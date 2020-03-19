@@ -16,6 +16,9 @@ class AProtoFPSCPPCharacter : public ACharacter
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	class UCameraComponent* FirstPersonCameraComponent;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Gameplay, meta = (AllowPrivateAccess = "true"))
+	class UPhysicsHandleComponent* PhysicsHandle;
+
 	FHitResult Hit;
 	FVector Start;
 	FVector End;

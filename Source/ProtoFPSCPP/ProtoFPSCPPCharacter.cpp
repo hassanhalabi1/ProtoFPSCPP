@@ -9,9 +9,11 @@
 #include "Kismet/GameplayStatics.h"
 #include "MotionControllerComponent.h"
 #include "XRMotionControllerBase.h" // for FXRMotionControllerBase::RightHandSourceId
+#include "PhysicsEngine/PhysicsHandleComponent.h"
 #include "DrawDebugHelpers.h"
 #include "EngineGlobals.h"
 #include "Engine.h"
+
 DEFINE_LOG_CATEGORY_STATIC(LogFPChar, Warning, All);
 
 //////////////////////////////////////////////////////////////////////////
@@ -31,6 +33,9 @@ AProtoFPSCPPCharacter::AProtoFPSCPPCharacter()
 	FirstPersonCameraComponent->SetupAttachment(GetCapsuleComponent());
 	FirstPersonCameraComponent->RelativeLocation = FVector(-39.56f, 1.75f, 64.f); // Position the camera
 	FirstPersonCameraComponent->bUsePawnControlRotation = true;
+
+	//Create PhysicsHandleComponent
+	PhysicsHandle = CreateDefaultSubobject<UPhysicsHandleComponent>(TEXT("PhysicsHandle"));
 }
 
 void AProtoFPSCPPCharacter::BeginPlay()
@@ -46,6 +51,11 @@ void AProtoFPSCPPCharacter::Tick(float DeltaTime)
 	End = FirstPersonCameraComponent->GetForwardVector() * RaycastDistance + GetActorLocation();
 	FCollisionQueryParams TraceParams;
 	GetWorld()->LineTraceSingleByChannel(Hit, Start, End, ECC_Visibility, TraceParams);
+
+	if (PhysicsHandle->GetGrabbedComponent()) {
+		GEngine->AddOnScreenDebugMessage(-1, 1.F, FColor::Red, FString::Printf(TEXT("You are hitting: %s"),
+			*PhysicsHandle->GetGrabbedComponent()->GetName()));
+	}
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -104,7 +114,8 @@ void AProtoFPSCPPCharacter::LookUpAtRate(float Rate)
 void AProtoFPSCPPCharacter::Interact()
 {
 	DrawDebugLine(GetWorld(), Start, End, FColor::Red, false, 2.0f);
-	if (Hit.GetActor()) {
+	if (Hit.GetComponent()) {
+		PhysicsHandle->GrabComponentAtLocation(Hit.GetComponent(), Hit.BoneName, End);
 		if (GEngine) {
 			GEngine->AddOnScreenDebugMessage(-1, 1.F, FColor::Red, FString::Printf(TEXT("You are hitting: %s"),
 				*Hit.GetActor()->GetName()));
