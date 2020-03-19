@@ -41,22 +41,11 @@ void AProtoFPSCPPCharacter::BeginPlay()
 void AProtoFPSCPPCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	FHitResult Hit;
-	FVector Start;
-	FVector End;
+	
 	Start = FirstPersonCameraComponent->GetComponentLocation();
 	End = FirstPersonCameraComponent->GetForwardVector() * RaycastDistance + GetActorLocation();
 	FCollisionQueryParams TraceParams;
-	bool isHit = GetWorld()->LineTraceSingleByChannel(Hit, Start, End, ECC_Visibility,TraceParams);
-	DrawDebugLine(GetWorld(), Start, End, FColor::Red, false,2.0f);
-	if (isHit){
-		if (GEngine){
-			GEngine->AddOnScreenDebugMessage(-1,1.F,FColor::Red,FString::Printf(TEXT("You are hitting: %s"),
-				*Hit.GetActor()->GetName()));
-			GEngine->AddOnScreenDebugMessage(-1, 1.F, FColor::Red, FString::Printf(TEXT("Impact Point : %s"),
-				*Hit.ImpactPoint.ToString()));
-		}
-	}
+	GetWorld()->LineTraceSingleByChannel(Hit, Start, End, ECC_Visibility, TraceParams);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -67,7 +56,7 @@ void AProtoFPSCPPCharacter::SetupPlayerInputComponent(class UInputComponent* Pla
 	// set up gameplay key bindings
 	check(PlayerInputComponent);
 
-	//PlayerInputComponent->BindAction("Interact", IE_Pressed, this, );
+	PlayerInputComponent->BindAction("Interact", IE_Pressed, this, &AProtoFPSCPPCharacter::Interact);
 
 	// Bind movement events
 	PlayerInputComponent->BindAxis("MoveForward", this, &AProtoFPSCPPCharacter::MoveForward);
@@ -114,5 +103,13 @@ void AProtoFPSCPPCharacter::LookUpAtRate(float Rate)
 
 void AProtoFPSCPPCharacter::Interact()
 {
-
+	DrawDebugLine(GetWorld(), Start, End, FColor::Red, false, 2.0f);
+	if (Hit.GetActor()) {
+		if (GEngine) {
+			GEngine->AddOnScreenDebugMessage(-1, 1.F, FColor::Red, FString::Printf(TEXT("You are hitting: %s"),
+				*Hit.GetActor()->GetName()));
+			GEngine->AddOnScreenDebugMessage(-1, 1.F, FColor::Red, FString::Printf(TEXT("Impact Point : %s"),
+				*Hit.ImpactPoint.ToString()));
+		}
+	}
 }
