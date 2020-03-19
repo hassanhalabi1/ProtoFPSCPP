@@ -31,12 +31,6 @@ AProtoFPSCPPCharacter::AProtoFPSCPPCharacter()
 	FirstPersonCameraComponent->SetupAttachment(GetCapsuleComponent());
 	FirstPersonCameraComponent->RelativeLocation = FVector(-39.56f, 1.75f, 64.f); // Position the camera
 	FirstPersonCameraComponent->bUsePawnControlRotation = true;
-
-
-
-	// Note: The ProjectileClass and the skeletal mesh/anim blueprints for Mesh1P, FP_Gun, and VR_Gun 
-	// are set in the derived blueprint asset named MyCharacter to avoid direct content references in C++.
-
 }
 
 void AProtoFPSCPPCharacter::BeginPlay()
@@ -55,19 +49,14 @@ void AProtoFPSCPPCharacter::Tick(float DeltaTime)
 	FCollisionQueryParams TraceParams;
 	bool isHit = GetWorld()->LineTraceSingleByChannel(Hit, Start, End, ECC_Visibility,TraceParams);
 	DrawDebugLine(GetWorld(), Start, End, FColor::Red, false,2.0f);
-	if (isHit)
-	{
-		if (GEngine)
-		{
+	if (isHit){
+		if (GEngine){
 			GEngine->AddOnScreenDebugMessage(-1,1.F,FColor::Red,FString::Printf(TEXT("You are hitting: %s"),
 				*Hit.GetActor()->GetName()));
 			GEngine->AddOnScreenDebugMessage(-1, 1.F, FColor::Red, FString::Printf(TEXT("Impact Point : %s"),
 				*Hit.ImpactPoint.ToString()));
-		
 		}
 	}
-
-
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -77,10 +66,8 @@ void AProtoFPSCPPCharacter::SetupPlayerInputComponent(class UInputComponent* Pla
 {
 	// set up gameplay key bindings
 	check(PlayerInputComponent);
-	
-	// Enable touchscreen input
-	EnableTouchscreenMovement(PlayerInputComponent);
 
+	//PlayerInputComponent->BindAction("Interact", IE_Pressed, this, );
 
 	// Bind movement events
 	PlayerInputComponent->BindAxis("MoveForward", this, &AProtoFPSCPPCharacter::MoveForward);
@@ -94,68 +81,6 @@ void AProtoFPSCPPCharacter::SetupPlayerInputComponent(class UInputComponent* Pla
 	PlayerInputComponent->BindAxis("LookUp", this, &APawn::AddControllerPitchInput);
 	PlayerInputComponent->BindAxis("LookUpRate", this, &AProtoFPSCPPCharacter::LookUpAtRate);
 }
-void AProtoFPSCPPCharacter::BeginTouch(const ETouchIndex::Type FingerIndex, const FVector Location)
-{
-	if (TouchItem.bIsPressed == true)
-	{
-		return;
-	}
-	if ((FingerIndex == TouchItem.FingerIndex) && (TouchItem.bMoved == false))
-	{
-		
-	}
-	TouchItem.bIsPressed = true;
-	TouchItem.FingerIndex = FingerIndex;
-	TouchItem.Location = Location;
-	TouchItem.bMoved = false;
-}
-
-void AProtoFPSCPPCharacter::EndTouch(const ETouchIndex::Type FingerIndex, const FVector Location)
-{
-	if (TouchItem.bIsPressed == false)
-	{
-		return;
-	}
-	TouchItem.bIsPressed = false;
-}
-
-//Commenting this section out to be consistent with FPS BP template.
-//This allows the user to turn without using the right virtual joystick
-
-//void AProtoFPSCPPCharacter::TouchUpdate(const ETouchIndex::Type FingerIndex, const FVector Location)
-//{
-//	if ((TouchItem.bIsPressed == true) && (TouchItem.FingerIndex == FingerIndex))
-//	{
-//		if (TouchItem.bIsPressed)
-//		{
-//			if (GetWorld() != nullptr)
-//			{
-//				UGameViewportClient* ViewportClient = GetWorld()->GetGameViewport();
-//				if (ViewportClient != nullptr)
-//				{
-//					FVector MoveDelta = Location - TouchItem.Location;
-//					FVector2D ScreenSize;
-//					ViewportClient->GetViewportSize(ScreenSize);
-//					FVector2D ScaledDelta = FVector2D(MoveDelta.X, MoveDelta.Y) / ScreenSize;
-//					if (FMath::Abs(ScaledDelta.X) >= 4.0 / ScreenSize.X)
-//					{
-//						TouchItem.bMoved = true;
-//						float Value = ScaledDelta.X * BaseTurnRate;
-//						AddControllerYawInput(Value);
-//					}
-//					if (FMath::Abs(ScaledDelta.Y) >= 4.0 / ScreenSize.Y)
-//					{
-//						TouchItem.bMoved = true;
-//						float Value = ScaledDelta.Y * BaseTurnRate;
-//						AddControllerPitchInput(Value);
-//					}
-//					TouchItem.Location = Location;
-//				}
-//				TouchItem.Location = Location;
-//			}
-//		}
-//	}
-//}
 
 void AProtoFPSCPPCharacter::MoveForward(float Value)
 {
@@ -187,17 +112,7 @@ void AProtoFPSCPPCharacter::LookUpAtRate(float Rate)
 	AddControllerPitchInput(Rate * BaseLookUpRate * GetWorld()->GetDeltaSeconds());
 }
 
-bool AProtoFPSCPPCharacter::EnableTouchscreenMovement(class UInputComponent* PlayerInputComponent)
+void AProtoFPSCPPCharacter::Interact()
 {
-	if (FPlatformMisc::SupportsTouchInput() || GetDefault<UInputSettings>()->bUseMouseForTouch)
-	{
-		PlayerInputComponent->BindTouch(EInputEvent::IE_Pressed, this, &AProtoFPSCPPCharacter::BeginTouch);
-		PlayerInputComponent->BindTouch(EInputEvent::IE_Released, this, &AProtoFPSCPPCharacter::EndTouch);
 
-		//Commenting this out to be more consistent with FPS BP template.
-		//PlayerInputComponent->BindTouch(EInputEvent::IE_Repeat, this, &AProtoFPSCPPCharacter::TouchUpdate);
-		return true;
-	}
-	
-	return false;
 }
