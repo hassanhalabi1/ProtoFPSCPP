@@ -48,7 +48,7 @@ void AProtoFPSCPPCharacter::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 	
 	Start = FirstPersonCameraComponent->GetComponentLocation();
-	End = FirstPersonCameraComponent->GetForwardVector() * RaycastDistance + GetActorLocation();
+	End = FirstPersonCameraComponent->GetForwardVector() * RaycastDistance + GetFirstPersonCameraComponent() ->GetComponentLocation();
 	FCollisionQueryParams TraceParams;
 	GetWorld()->LineTraceSingleByChannel(Hit, Start, End, ECC_Visibility, TraceParams);
 
